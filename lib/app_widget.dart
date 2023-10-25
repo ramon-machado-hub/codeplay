@@ -1,3 +1,7 @@
+import 'package:codeplay/views/cadastrar_endereco.dart';
+import 'package:codeplay/views/enderecos.dart';
+import 'package:codeplay/views/finalizar_pedido.dart';
+import 'package:codeplay/views/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -10,14 +14,15 @@ class AppWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return
       MaterialApp(
-      title: 'CODEPLAY',
+
+        title: 'CODEPLAY',
       theme: ThemeData(
         useMaterial3: true,
         // primaryColor: AppColors.primaryColor,
       ),
-      home: Maps(),
+      home: Enderecos(),
       routes: {
-
+        "/cadastrar_endereco": (context) => const CadastroEndereco(),
       },
     );
   }

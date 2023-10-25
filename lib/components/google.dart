@@ -51,7 +51,7 @@ class _MapsState extends State<Maps> {
             mapType: MapType.terrain,
             initialCameraPosition: CameraPosition(
               target: LatLng(-10.9145, -37.6639),
-              zoom: 13,
+              zoom: 15,
             ),
           ),
         )

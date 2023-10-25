@@ -1,11 +1,7 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:flutter_google_maps_webservices/geolocation.dart';
-// import 'package:flutter/cupertino.dart';
-// import 'package:flutter/material.dart';
-// import 'package:google_maps_flutter_web/google_maps_flutter_web.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'dart:html' as html;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,64 +11,125 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // late GoogleMapController mapController;
-  // final geolocation =
-  // GoogleMapsGeolocation(apiKey: Platform.environment['AIzaSyCQAOocqaXe95PO3jOJG-ibR9Sk7CeM7cM']);
+  GoogleMapController? mapController;
+  LatLng _initialCameraPosition = LatLng(0, 0);
+  LocationData? _currentLocation;
+  bool _hasPermission = false;
 
-  // Future<void> getLocation()async{
-  //   var sessionToken = 'xyzabc_1234';
-  //   var res = await places.autocomplete('Amoeba', sessionToken: sessionToken);
-  //   if (res.isOkay) {
-  //     // list autocomplete prediction
-  //     for (var p in res.predictions) {
-  //       print('- ${p.description}');
-  //     }
-  //
-  //     final placeId = res.predictions.first.placeId;
-  //     if (placeId == null) return;
-  //
-  //     // get detail of the first result
-  //     var details = await places.getDetailsByPlaceId(
-  //       placeId,
-  //       sessionToken: sessionToken,
-  //     );
-  //
-  //     print('\nDetails :');
-  //     print(details.result.formattedAddress);
-  //     print(details.result.formattedPhoneNumber);
-  //     print(details.result.url);
-  //   } else {
-  //     print(res.errorMessage);
-  //   }
-  //
-  //   places.dispose();
-  //   // var res = await geolocation.getGeolocation();
-  //   // if (res.isOkay) {
-  //   //   print('Latitude: ${res.location?.lat}');
-  //   //   print('Longitude: ${res.location?.lng}');
-  //   //   print('Accuracy: ${res.accuracy}');
-  //   // } else {
-  //   //   print(res.error?.message);
-  //   // }
-  //   //
-  //   // geolocation.dispose();
-  // }
+  final Location location = Location();
+  PermissionStatus? _permissionStatus;
+
+  Future<void> requestLocationPermission() async {
+    final geolocation = html.window.navigator.geolocation;
+    if (geolocation != null) {
+      final position = await geolocation.getCurrentPosition();
+      setState(() {
+        _hasPermission = true;
+      });
+    }
+  }
+
+  Future<void> checkLocationPermission() async {
+    final geolocation = html.window.navigator.geolocation;
+    if (geolocation != null) {
+      final position = await geolocation.getCurrentPosition();
+      setState(() {
+        _hasPermission = true;
+      });
+    }
+  }
+
+  Widget buildMap() {
+    if (_hasPermission) {
+      return Container(
+        color: Colors.cyan,
+        height: MediaQuery.of(context).size.height * 0.5,
+        width: (MediaQuery.of(context).size.width / 2) * 0.9,
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: _initialCameraPosition,
+            zoom: 15,
+          ),
+          onMapCreated: (GoogleMapController controller) {
+            mapController = controller;
+          },
+          myLocationEnabled: true,
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // getLocation();
+    checkLocationPermission();
+
   }
   
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("HOME"),
-      // ),
+      appBar: AppBar(
+        title: Text("CADASTRAR ENDEREÇOS"),
+      ),
       body: Container(
+        width: size.width,
+        height: size.height,
         color: Colors.amber,
+        child: Row(
+          children: [
+            SizedBox(
+              width: size.width/2,
+              height: size.height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  //cabeçalho
+                  SizedBox(
+                    height: size.height*0.1,
+                    width: (size.width/2)*0.9,
+                    child: Text(
+                      'Status da Permissão: ${_permissionStatus.toString()}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+
+                  ),
+                  ElevatedButton(
+                    onPressed: requestLocationPermission,
+                    child: Text('Solicitar Permissão de Localização'),
+                  ),
+                  //mapa
+                  buildMap(),
+                  // Container(
+                  //   color: Colors.cyan,
+                  //   height: size.height*0.5,
+                  //   width: (size.width/2)*0.9,
+                  //   child: GoogleMap(
+                  //     initialCameraPosition: CameraPosition(
+                  //       target: _initialCameraPosition,
+                  //       zoom: 15,
+                  //     ),
+                  //     onMapCreated: (GoogleMapController controller) {
+                  //       mapController = controller;
+                  //     },
+                  //     myLocationEnabled: true,
+                  //   ),
+                  // )
+                ],
+              ),
+            ),
+            SizedBox(
+              width: size.width/2,
+              height: size.height,
+            )
+
+          ],
+        ),
+
       ),
     );
   }
